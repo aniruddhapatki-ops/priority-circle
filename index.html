@@ -3,106 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Priority Contacts</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-            padding: 20px;
-        }
-        header {
-            background: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-        .contact {
-            background: #fff;
-            padding: 20px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        button {
-            padding: 10px 15px;
-            background: #5cb85c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:disabled {
-            background: #ccc;
-        }
-    </style>
+    <title>Priority Contacts Manager</title>
 </head>
 <body>
-    <header>
-        <h1>Priority Contacts Manager</h1>
-    </header>
-    <div class="container">
-        <h2>Add New Contact</h2>
-        <input type="text" id="name" placeholder="Contact Name">
-        <input type="text" id="phone" placeholder="Phone Number">
-        <input type="text" id="whatsapp" placeholder="WhatsApp Number">
-        <button id="addContactBtn">Add Contact</button>
-        <h2>Contact List</h2>
-        <div id="contactList"></div>
-    </div>
+    <h1>Priority Contacts Manager</h1>
+    <div id="contacts"></div>
+    <button onclick="addContact()">Add Contact</button>
+
     <script>
-        const addContactBtn = document.getElementById('addContactBtn');
-        const contactList = document.getElementById('contactList');
-        const contacts = [];
+        let contacts = [];
 
-        addContactBtn.addEventListener('click', function() {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const whatsapp = document.getElementById('whatsapp').value;
-
-            if (name && (phone || whatsapp)) {
-                const contact = { name, phone, whatsapp };
-                contacts.push(contact);
+        function addContact() {
+            const name = prompt('Enter contact name:');
+            const phone = prompt('Enter contact phone:');
+            if (name && phone) {
+                contacts.push({ name, phone });
                 renderContacts();
-                clearInputs();
-            } else {
-                alert('Please fill at least name and one contact method (phone or WhatsApp).');
             }
-        });
+        }
+
+        function editContact(index) {
+            const contact = contacts[index];
+            const newName = prompt('Edit contact name:', contact.name);
+            const newPhone = prompt('Edit contact phone:', contact.phone);
+            if (newName && newPhone) {
+                contacts[index] = { name: newName, phone: newPhone };
+                renderContacts();
+            }
+        }
+
+        function deleteContact(index) {
+            contacts.splice(index, 1);
+            renderContacts();
+        }
 
         function renderContacts() {
-            contactList.innerHTML = '';
+            const contactsDiv = document.getElementById('contacts');
+            contactsDiv.innerHTML = '';
             contacts.forEach((contact, index) => {
-                const contactDiv = document.createElement('div');
-                contactDiv.classList.add('contact');
-                contactDiv.innerHTML = `<strong>${contact.name}</strong> - Phone: ${contact.phone || 'N/A'}, WhatsApp: ${contact.whatsapp || 'N/A'}<br><button onclick="sendSMS(${index})">Send SMS</button> <button onclick="sendWhatsApp(${index})">WhatsApp</button>`;
-                contactList.appendChild(contactDiv);
+                contactsDiv.innerHTML += `<div>
+                    <span>${contact.name} - ${contact.phone}</span>
+                    <button onclick="editContact(${index})">Edit</button>
+                    <button onclick="deleteContact(${index})">Delete</button>
+                    <button onclick="contact(${index}, 'phone')">Call</button>
+                    <button onclick="contact(${index}, 'whatsapp')">WhatsApp</button>
+                    <button onclick="contact(${index}, 'sms')">SMS</button>
+                </div>`;
             });
         }
 
-        function clearInputs() {
-            document.getElementById('name').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('whatsapp').value = '';
-        }
-
-        function sendSMS(index) {
+        function contact(index, method) {
             const contact = contacts[index];
-            alert(`Sending SMS to ${contact.name} on number ${contact.phone}`);
-        }
-
-        function sendWhatsApp(index) {
-            const contact = contacts[index];
-            alert(`Sending WhatsApp message to ${contact.name} on number ${contact.whatsapp}`);
+            let url;
+            switch (method) {
+                case 'phone':
+                    url = `tel:${contact.phone}`;
+                    break;
+                case 'whatsapp':
+                    url = `https://wa.me/${contact.phone}`;
+                    break;
+                case 'sms':
+                    url = `sms:${contact.phone}`;
+                    break;
+            }
+            window.open(url);
         }
     </script>
 </body>
